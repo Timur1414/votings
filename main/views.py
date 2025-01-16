@@ -42,4 +42,5 @@ def list_votings_page(request):
     context = {
         'title': 'List Votings'
     }
+    context['votings'] = []
     return render(request, 'votings/list.html', context)

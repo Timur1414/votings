@@ -13,4 +13,14 @@
             </div>
         </div>
     </nav>
+    <div class="border border-primary-subtle rounded my-2 p-1">
+        {% for voting in votings %}
+
+        {% empty %}
+            <p>No votings...</p>
+        {% endfor %}
+    </div>
+    <div class="position-relative text-end">
+        <a class="btn btn-success" href="#">Create</a>
+    </div>
 {% endblock %}
