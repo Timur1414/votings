@@ -35,3 +35,11 @@ class SignUp(CreateView):
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+
+@login_required()
+def list_votings_page(request):
+    context = {
+        'title': 'List Votings'
+    }
+    return render(request, 'votings/list.html', context)
