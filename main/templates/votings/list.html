@@ -15,7 +15,7 @@
     </nav>
     <div class="border border-primary-subtle rounded my-2 p-1">
         {% for voting in votings %}
-
+            <p>{{ voting.title }}</p>
         {% empty %}
             <p>No votings...</p>
         {% endfor %}

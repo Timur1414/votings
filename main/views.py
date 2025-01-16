@@ -1,9 +1,12 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, ListView
+
+from main.models import Voting
 
 
 class MainPage(TemplateView):
@@ -37,10 +40,14 @@ def logout_view(request):
     return redirect('index')
 
 
-@login_required()
-def list_votings_page(request):
-    context = {
-        'title': 'List Votings'
-    }
-    context['votings'] = []
-    return render(request, 'votings/list.html', context)
+class ListVotingsPage(LoginRequiredMixin, ListView):
+    template_name = 'votings/list.html'
+    context_object_name = 'votings'
+    queryset = Voting.objects.filter(blocked=False).all()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        context.update({
+            'title': 'List Votings',
+        })
+        return context
