@@ -6,11 +6,13 @@
         <p class="fs-4"><strong>Title: </strong>{{ voting.title }}</p>
         <div>
             <p>Questions:</p>
-            {% for question in questions %}
-                <a href="{% url 'question' id=question.id %}">{{ question.title }}</a>
-            {% empty %}
-                <p>Empty...</p>
-            {% endfor %}
+            <div class="d-flex align-content-around flex-wrap">
+                {% for question in questions %}
+                    {% include "votings/question_card.html" %}
+                {% empty %}
+                    <p>Empty...</p>
+                {% endfor %}
+            </div>
             <br>
             <a class="btn btn-success" href="{% url 'create_questions' id=voting.id %}">Add question</a>
         </div>

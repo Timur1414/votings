@@ -13,9 +13,9 @@
             </div>
         </div>
     </nav>
-    <div class="border border-primary-subtle rounded my-2 p-1">
+    <div class="border border-primary-subtle rounded my-2 p-1 d-flex align-content-around flex-wrap">
         {% for voting in votings %}
-            <a href="{% url 'voting' id=voting.id %}">{{ voting.title }}</a>
+            {% include "votings/voting_card.html" %}
         {% empty %}
             <p>No votings...</p>
         {% endfor %}

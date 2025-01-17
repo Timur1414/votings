@@ -11,15 +11,15 @@
         Multiple Choice
         {% endif %}
     </p>
-    <div>
+    <div class="d-flex align-content-around flex-wrap">
         {% for variant in variants %}
-            <a href="#">{{ variant.text }}</a>
+            {% include "votings/variant_card.html" %}
         {% empty %}
             <p>No variants...</p>
         {% endfor %}
-        <br>
-        <a class="btn btn-success" href="{% url 'create_variants' id=question.id %}">Add variant</a>
     </div>
+    <br>
+    <a class="btn btn-success" href="{% url 'create_variants' id=question.id %}">Add variant</a>
     <div class="text-end my-3">
     <a class="btn btn-primary" href="{% url 'voting' id=question.voting.id %}">Save</a>
     </div>

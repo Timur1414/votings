@@ -17,6 +17,10 @@ class Voting(models.Model):
         self.published = True
         self.save()
 
+    @staticmethod
+    def get_active_votings():
+        return Voting.objects.filter(blocked=False).filter(published=True).all().order_by('likes')
+
     def get_questions(self) -> List:
         return Question.objects.filter(voting=self).all()
 

@@ -1,0 +1,8 @@
+<a class="text-reset text-decoration-none" href="{% url 'question' id=question.id %}">
+    <div class="card text-bg-secondary m-3 text-break" style="max-width: 20rem;">
+      <div class="card-body">
+        <h5 class="card-title">{{ question.title }}</h5>
+        <p class="card-text">{{ question.description }}</p>
+      </div>
+    </div>
+</a>
