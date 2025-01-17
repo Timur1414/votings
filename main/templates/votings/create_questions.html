@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Create Question</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if form.errors %}
+        Errors:
+        <ul>
+            {% for key, value in field.errors.items %}
+            <li>Field {{ key|escape }}: {{ value|escape }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <input class="btn btn-success" type="submit" value="Create">
+    </form>
+{% endblock %}

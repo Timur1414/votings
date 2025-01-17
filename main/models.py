@@ -1,3 +1,5 @@
+from typing import List
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -8,7 +10,15 @@ class Voting(models.Model):
     author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     blocked = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
     likes = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    def publish(self):
+        self.published = True
+        self.save()
+
+    def get_questions(self) -> List:
+        return Question.objects.filter(voting=self).all()
 
 
 class Question(models.Model):
@@ -21,6 +31,9 @@ class Question(models.Model):
     description = models.TextField()
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE)
     type = models.IntegerField(choices=QUESTION_TYPES)
+
+    def get_variants(self) -> List:
+        return Variant.objects.filter(question=self).all()
 
 
 class Variant(models.Model):

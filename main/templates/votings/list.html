@@ -15,12 +15,12 @@
     </nav>
     <div class="border border-primary-subtle rounded my-2 p-1">
         {% for voting in votings %}
-            <p>{{ voting.title }}</p>
+            <a href="{% url 'voting' id=voting.id %}">{{ voting.title }}</a>
         {% empty %}
             <p>No votings...</p>
         {% endfor %}
     </div>
     <div class="position-relative text-end">
-        <a class="btn btn-success" href="#">Create</a>
+        <a class="btn btn-success" href="{% url 'create_voting' %}">Create</a>
     </div>
 {% endblock %}

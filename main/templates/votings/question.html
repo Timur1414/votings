@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <p><strong>Title: </strong>{{ question.title }}</p>
+    <p><strong>Description: </strong>{{ question.description }}</p>
+    <p><strong>Type: </strong>
+        {% if question.type == 1 %}
+        Single Choice
+        {% else %}
+        Multiple Choice
+        {% endif %}
+    </p>
+    <div>
+        {% for variant in variants %}
+            <a href="#">{{ variant.text }}</a>
+        {% empty %}
+            <p>No variants...</p>
+        {% endfor %}
+        <br>
+        <a class="btn btn-success" href="{% url 'create_variants' id=question.id %}">Add variant</a>
+    </div>
+    <div class="text-end my-3">
+    <a class="btn btn-primary" href="{% url 'voting' id=question.voting.id %}">Save</a>
+    </div>
+{% endblock %}
