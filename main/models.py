@@ -1,5 +1,4 @@
 from typing import List
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -26,6 +25,21 @@ class Voting(models.Model):
 
     def get_questions(self) -> List:
         return Question.objects.filter(voting=self).all()
+
+    @staticmethod
+    def get_votings_of_user(user: get_user_model) -> List:
+        return Voting.objects.filter(author=user).all()
+
+    @staticmethod
+    def get_voted_votings(user: get_user_model) -> List:
+        votings = {
+            vote_fact.variant.question.voting for vote_fact in VoteFact.objects.filter(user=user).all()
+        }
+        return list(votings)
+
+    @staticmethod
+    def get_liked_votings(user: get_user_model) -> List:
+        return Voting.objects.filter(like__user=user).all()
 
 
 class Question(models.Model):

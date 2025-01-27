@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="text-center">{{ user.username }}</h1>
+    {% if is_same_user %}
+        {% include "profile/same_user.html" %}
+    {% else %}
+        {% include "profile/not_same_user.html" %}
+    {% endif %}
+{% endblock %}

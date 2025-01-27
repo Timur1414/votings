@@ -27,4 +27,5 @@ urlpatterns = [
     path('signup/', views.SignUp.as_view(), name='signup'),
 
     path('votings/', include('votings.urls.votings')),
+    path('profile/', include('votings.urls.profile')),
 ]

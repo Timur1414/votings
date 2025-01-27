@@ -1,4 +1,4 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -164,4 +164,25 @@ class QuestionPage(LoginRequiredMixin, TemplateView):
         question = get_object_or_404(Question, id=self.kwargs['id'])
         context['question'] = question
         context['variants'] = question.get_variants()
+        return context
+
+
+class ProfilePage(LoginRequiredMixin, TemplateView):
+    template_name = 'profile/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = get_object_or_404(get_user_model(), id=self.kwargs['id'])
+        is_same_user = user == self.request.user
+        votings_of_user = Voting.get_votings_of_user(user)
+        liked_votings = Voting.get_liked_votings(user)
+        voted_votings = Voting.get_voted_votings(user)
+        context.update({
+            'title': 'Profile',
+            'user': user,
+            'is_same_user': is_same_user,
+            'votings_of_user': votings_of_user,
+            'liked_votings': liked_votings,
+            'voted_votings': voted_votings,
+        })
         return context
