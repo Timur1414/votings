@@ -13,12 +13,15 @@ class Voting(models.Model):
     published = models.BooleanField(default=False)
     likes = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
+    def is_user_voted(self, user: get_user_model) -> bool:
+        return VoteFact.objects.filter(user=user).filter(variant__question__voting=self).exists()
+
     def publish(self):
         self.published = True
         self.save()
 
     @staticmethod
-    def get_active_votings():
+    def get_active_votings() -> List:
         return Voting.objects.filter(blocked=False).filter(published=True).all().order_by('likes')
 
     def get_questions(self) -> List:
@@ -44,10 +47,23 @@ class Variant(models.Model):
     text = models.CharField(max_length=100)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
+    def is_user_voted(self, user: get_user_model) -> bool:
+        return VoteFact.objects.filter(user=user).filter(variant=self).exists()
+
+    def calculate_votes(self) -> int:
+        count = VoteFact.objects.filter(variant=self).count()
+        total_count = VoteFact.objects.filter(variant__question=self.question).count()
+        return int(count / total_count * 100) if total_count != 0 else 0
+
 
 class VoteFact(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+
+    @staticmethod
+    def vote(user: get_user_model, variant: Variant):
+        obj = VoteFact.objects.create(user=user, variant=variant)
+        obj.save()
 
 
 class Like(models.Model):

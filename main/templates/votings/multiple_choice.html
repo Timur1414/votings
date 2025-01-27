@@ -1,0 +1,8 @@
+{% for variant in question.get_variants %}
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="variant_id" value="{{ variant.id }}" id="{{ vari }}">
+        <label class="form-check-label" for="flexCheckDefault">
+            {{ variant.text }}
+        </label>
+    </div>
+{% endfor %}

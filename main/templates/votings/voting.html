@@ -17,18 +17,42 @@
             <a class="btn btn-success" href="{% url 'create_questions' id=voting.id %}">Add question</a>
         </div>
         <div class="my-3 text-end">
-            <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Publish</button>
+            <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Publish
+            </button>
         </div>
-        <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Warning</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
-          <div class="offcanvas-body">
-            <p><a href="{% url 'publish_voting' id=voting.id %}" class="btn btn-success">Publish</a></p>
-          </div>
+        <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1"
+             id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Warning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <p><a href="{% url 'publish_voting' id=voting.id %}" class="btn btn-success">Publish</a></p>
+            </div>
         </div>
     {% else %}
         <h1 class="text-center">{{ voting.title }}</h1>
+        <p class="text-end">Author: <a class="text-decoration-none" href="#">{{ voting.author }}</a></p>
+        <p>Questions:</p>
+        {% if voted == False %}
+            <form method="POST">
+                {% csrf_token %}
+                <div>
+                    {% for question in questions %}
+                        <p class="fs-3 fw-medium">{{ question.title }}</p>
+                        <p class="fs-5">{{ question.description }}</p>
+                        {% if question.type == 1 %}
+                            {% include "votings/single_choice.html" %}
+                        {% else %}
+                            {% include "votings/multiple_choice.html" %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <input class="btn btn-success" type="submit" value="Vote">
+            </form>
+        {% else %}
+            {% include "votings/results.html" %}
+        {% endif %}
     {% endif %}
 {% endblock %}

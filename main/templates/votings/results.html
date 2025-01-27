@@ -1,0 +1,16 @@
+{% for question in questions %}
+    {% load custom_filters %}
+    <p class="fs-3 fw-medium">{{ question.title }}</p>
+    <p class="fs-5">{{ question.description }}</p>
+    {% for variant in question.get_variants %}
+        <div class="progress my-3
+         {% if variant|is_user_voted:request.user %}
+         border border-2 border-success
+         {% endif %}" role="progressbar" aria-label="Example with label"
+             aria-valuenow="{{ variant.calculate_votes }}" aria-valuemin="0"
+             aria-valuemax="100">
+            <div class="progress-bar overflow-visible text-dark bg-info"
+                 style="width: {{ variant.calculate_votes }}%">{{ variant.text }}</div>
+        </div>
+    {% endfor %}
+{% endfor %}
