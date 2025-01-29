@@ -33,7 +33,9 @@
         </div>
     {% else %}
         <h1 class="text-center">{{ voting.title }}</h1>
-        <p class="text-end">Author: <a class="text-decoration-none" href="{% url 'profile' id=voting.author.id %}">{{ voting.author }}</a></p>
+        <p class="text-end">Author: <a class="text-decoration-none" href="{% url 'profile' id=voting.author.id %}">{{ voting.author }}</a>
+        <br>
+        <a href="{% url 'create_complaint' id=voting.id %}">Complain</a></p>
         <p>Questions:</p>
         {% if voted == False %}
             <form method="POST">

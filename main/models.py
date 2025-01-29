@@ -90,3 +90,17 @@ class Complaint(models.Model):
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE)
     text = models.TextField()
     is_active = models.BooleanField(default=True)
+
+    @staticmethod
+    def get_opened_complains() -> List:
+        return Complaint.objects.filter(is_active=True).all()
+
+    def block(self):
+        self.is_active = False
+        self.voting.blocked = True
+        self.voting.save()
+        self.save()
+
+    def skip(self):
+        self.is_active = False
+        self.save()

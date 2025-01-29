@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <p class="fs-4"><strong>Complaint to voting: </strong> <a
+            href="{% url 'voting' id=complaint.voting.id %}">{{ complaint.voting.title }}</a></p>
+    <p>{{ complaint.text }}</p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="d-flex justify-content-evenly">
+            <input type="radio" class="btn-check" name="result" value="skip" id="skip_btn" required>
+            <label class="btn text-info" for="skip_btn">Skip</label>
+
+            <input type="radio" class="btn-check" name="result" value="block" id="block_btn" required>
+            <label class="btn text-danger" for="block_btn">Block</label>
+        </div>
+        <div class="text-center">
+            <input class="btn btn-success" type="submit" value="Send">
+        </div>
+    </form>
+{% endblock %}

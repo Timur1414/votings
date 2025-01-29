@@ -1,0 +1,8 @@
+<a class="text-reset text-decoration-none" href="{% url 'complaint' id=complaint.id %}">
+    <div class="card text-bg-warning m-3 text-break" style="max-width: 20rem;">
+      <div class="card-header">{{ complaint.user }}</div>
+      <div class="card-body">
+        <h5 class="card-title">{{ complaint.voting.title }}</h5>
+      </div>
+    </div>
+</a>

@@ -1,13 +1,13 @@
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, CreateView, ListView
-from main.forms import CreateVotingForm, CreateQuestionForm, CreateVariantForm
-from main.models import Voting, Question, Variant, VoteFact
+from django.views.generic import TemplateView, CreateView, ListView, View
+from main.forms import CreateVotingForm, CreateQuestionForm, CreateVariantForm, CreateComplaint
+from main.models import Voting, Question, Variant, VoteFact, Complaint
 
 
 class MainPage(TemplateView):
@@ -184,5 +184,68 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
             'votings_of_user': votings_of_user,
             'liked_votings': liked_votings,
             'voted_votings': voted_votings,
+        })
+        return context
+
+
+class ListComplainsPage(UserPassesTestMixin, LoginRequiredMixin, ListView):
+    template_name = 'complains/list.html'
+    context_object_name = 'complains'
+    queryset = Complaint.get_opened_complains()
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        context.update({
+            'title': 'List Complains',
+        })
+        return context
+
+
+class ComplaintPage(UserPassesTestMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'complains/complaint.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': 'Complain',
+        })
+        complain = get_object_or_404(Complaint, id=self.kwargs['id'])
+        context['complaint'] = complain
+        return context
+
+    def post(self, request, *args, **kwargs):
+        complain = get_object_or_404(Complaint, id=self.kwargs['id'])
+        key = request.POST.get('result')
+        if key == 'skip':
+            complain.skip()
+        else:
+            complain.block()
+        return redirect('complains_list')
+
+
+class CreateComplaintPage(LoginRequiredMixin, CreateView):
+    template_name = 'complains/create_complaint.html'
+    form_class = CreateComplaint
+
+    def get_success_url(self):
+        return reverse_lazy('voting', kwargs={'id': self.kwargs['id']})
+
+    def get_initial(self):
+        voting = get_object_or_404(Voting, id=self.kwargs['id'])
+        return {
+            'user': self.request.user,
+            'voting': voting
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': 'Create Complaint',
         })
         return context

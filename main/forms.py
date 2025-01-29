@@ -1,5 +1,5 @@
 from django import forms
-from main.models import Voting, Question, Variant
+from main.models import Voting, Question, Variant, Complaint
 
 
 class CreateVotingForm(forms.ModelForm):
@@ -42,4 +42,18 @@ class CreateVariantForm(forms.ModelForm):
         widgets = {
             'text': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'question': forms.HiddenInput(),
+        }
+
+
+class CreateComplaint(forms.ModelForm):
+    class Meta:
+        model = Complaint
+        fields = ['text', 'voting', 'user']
+        labels = {
+            'text': 'Complaint Text',
+        }
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'voting': forms.HiddenInput(),
+            'user': forms.HiddenInput(),
         }
