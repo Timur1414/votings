@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:id>/', views.VotingPage.as_view(), name='voting'),
     path('<int:id>/publish/', views.publish_voting, name='publish_voting'),
     path('question/<int:id>/', views.QuestionPage.as_view(), name='question'),
+    path('<int:id>/like/', views.like_voting, name='like'),
 ]

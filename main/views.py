@@ -3,11 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, ListView, View
 from main.forms import CreateVotingForm, CreateQuestionForm, CreateVariantForm, CreateComplaint
 from main.models import Voting, Question, Variant, VoteFact, Complaint
+from votings.settings import BASE_URL
 
 
 class MainPage(TemplateView):
@@ -133,6 +135,7 @@ class VotingPage(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             'title': 'Voting',
+            'BASE_URL': BASE_URL,
         })
         voting = get_object_or_404(Voting, id=self.kwargs['id'])
         context['voting'] = voting
@@ -257,3 +260,14 @@ class CreateComplaintPage(LoginRequiredMixin, CreateView):
             'title': 'Create Complaint',
         })
         return context
+
+
+def like_voting(request, id: int):
+    voting = None
+    try:
+        print(id)
+        voting = Voting.objects.get(id=id)
+        voting.like(request.user)
+    except:
+        return JsonResponse({'message': 'Invalid id'}, status=404)
+    return JsonResponse({'count likes': voting.get_likes_count()}, status=200)

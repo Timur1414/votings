@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-
 {% block content %}
+    {% load custom_filters %}
     {% if not voting.published %}
         <p class="fs-4"><strong>Title: </strong>{{ voting.title }}</p>
         <div>
@@ -33,9 +33,10 @@
         </div>
     {% else %}
         <h1 class="text-center">{{ voting.title }}</h1>
-        <p class="text-end">Author: <a class="text-decoration-none" href="{% url 'profile' id=voting.author.id %}">{{ voting.author }}</a>
-        <br>
-        <a href="{% url 'create_complaint' id=voting.id %}">Complain</a></p>
+        <p class="text-end">Author: <a class="text-decoration-none"
+                                       href="{% url 'profile' id=voting.author.id %}">{{ voting.author }}</a>
+            <br>
+            <a href="{% url 'create_complaint' id=voting.id %}">Complain</a></p>
         <p>Questions:</p>
         {% if voted == False %}
             <form method="POST">
@@ -57,4 +58,67 @@
             {% include "votings/results.html" %}
         {% endif %}
     {% endif %}
+    <div class="d-flex justify-content-between py-3">
+        <button id="like_btn" class="btn btn-outline-success">Like <span
+                id="likes_count">{{ voting.get_likes_count }}</span></button>
+        <a class="btn btn-outline-secondary" href="{% url 'list_votings' %}">Votings list</a>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        async function like() {
+            var likes_count = document.getElementById('likes_count')
+            var count = parseInt(likes_count.innerText)
+            likes_count.innerText = (count + 1).toString()
+
+            const options = {
+                method: 'GET',
+            }
+            let response = await fetch('{{ BASE_URL }}{% url 'like' id=voting.id %}', options)
+            var data = await response.json()
+            console.log(data)
+            if (response.status === 404) {
+                return
+            }
+
+            var button = document.getElementById('like_btn')
+            button.removeEventListener('click', like, false)
+            button.classList.remove('btn-outline-success')
+            button.classList.add('btn-success')
+            button.addEventListener('click', un_like, false)
+        }
+
+        async function un_like() {
+            var likes_count = document.getElementById('likes_count')
+            var count = parseInt(likes_count.innerText)
+            likes_count.innerText = (count - 1).toString()
+
+            const options = {
+                method: 'GET',
+            }
+            let response = await fetch('{{ BASE_URL }}{% url 'like' id=voting.id %}', options)
+            var data = await response.json()
+            console.log(data)
+            if (response.status === 404) {
+                return
+            }
+
+            var button = document.getElementById('like_btn')
+            button.removeEventListener('click', un_like, false)
+            button.classList.remove('btn-success')
+            button.classList.add('btn-outline-success')
+            button.addEventListener('click', like, false)
+        }
+
+        var button = document.getElementById('like_btn')
+        if ({{ voting|is_user_liked:request.user }}) {
+            console.log('liked')
+            button.classList.remove('btn-outline-success')
+            button.classList.add('btn-success')
+            button.addEventListener('click', un_like, false)
+        } else {
+            button.addEventListener('click', like, false)
+        }
+    </script>
 {% endblock %}

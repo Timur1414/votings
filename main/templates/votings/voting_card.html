@@ -3,7 +3,7 @@
       <div class="card-header">{{ voting.author }}</div>
       <div class="card-body">
         <h5 class="card-title">{{ voting.title }}</h5>
-        <p class="card-text">Likes: 0</p>
+        <p class="card-text">Likes: {{ voting.get_likes_count }}</p>
       </div>
     </div>
 </a>

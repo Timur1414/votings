@@ -1,6 +1,5 @@
 from typing import List
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -10,7 +9,12 @@ class Voting(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     blocked = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
-    likes = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    def like(self, user: get_user_model):
+        like, created = Like.objects.get_or_create(user=user, voting=self)
+        if not created:
+            like.active = not like.active
+            like.save()
 
     def is_user_voted(self, user: get_user_model) -> bool:
         return VoteFact.objects.filter(user=user).filter(variant__question__voting=self).exists()
@@ -21,7 +25,7 @@ class Voting(models.Model):
 
     @staticmethod
     def get_active_votings() -> List:
-        return Voting.objects.filter(blocked=False).filter(published=True).all().order_by('likes')
+        return Voting.objects.filter(blocked=False).filter(published=True).all()
 
     def get_questions(self) -> List:
         return Question.objects.filter(voting=self).all()
@@ -39,7 +43,13 @@ class Voting(models.Model):
 
     @staticmethod
     def get_liked_votings(user: get_user_model) -> List:
-        return Voting.objects.filter(like__user=user).all()
+        return Voting.objects.filter(like__user=user, like__active=True).all()
+
+    def get_likes_count(self) -> int:
+        return Like.objects.filter(voting=self, active=True).count()
+
+    def is_user_liked(self, user: get_user_model) -> bool:
+        return Like.objects.filter(user=user, voting=self, active=True).exists()
 
 
 class Question(models.Model):
@@ -83,6 +93,7 @@ class VoteFact(models.Model):
 class Like(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
 
 
 class Complaint(models.Model):
