@@ -83,6 +83,8 @@ class CreateQuestionPage(LoginRequiredMixin, CreateView):
 
     def get_initial(self):
         voting = get_object_or_404(Voting, id=self.kwargs['id'])
+        if voting.author != self.request.user:
+            raise PermissionDenied()
         return {
             'voting': voting
         }
@@ -97,7 +99,7 @@ class CreateQuestionPage(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         voting = form.instance.voting
         if len(voting.get_questions()) > 0:
-            raise PermissionDenied('text')
+            raise PermissionDenied()
         return super().form_valid(form)
 
 
@@ -110,6 +112,8 @@ class CreateVariantsPage(LoginRequiredMixin, CreateView):
 
     def get_initial(self):
         question = get_object_or_404(Question, id=self.kwargs['id'])
+        if question.voting.author != self.request.user:
+            raise PermissionDenied()
         return {
             'question': question
         }
@@ -149,6 +153,8 @@ class VotingPage(LoginRequiredMixin, TemplateView):
 @login_required()
 def publish_voting(request, id: int):
     voting = get_object_or_404(Voting, id=id)
+    if voting.author != request.user:
+        raise PermissionDenied()
     voting.publish()
     return redirect('voting', id=voting.id)
 
@@ -162,6 +168,8 @@ class QuestionPage(LoginRequiredMixin, TemplateView):
             'title': 'Question',
         })
         question = get_object_or_404(Question, id=self.kwargs['id'])
+        if question.voting.author != self.request.user:
+            raise PermissionDenied()
         context['question'] = question
         context['variants'] = question.get_variants()
         return context
