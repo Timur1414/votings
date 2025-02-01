@@ -10,6 +10,7 @@ from django.views.generic import TemplateView, CreateView, ListView, View
 from main.forms import CreateVotingForm, CreateQuestionForm, CreateVariantForm, CreateComplaint
 from main.models import Voting, Question, Variant, VoteFact, Complaint
 from votings.settings import BASE_URL
+import logging
 
 
 class MainPage(TemplateView):
@@ -20,15 +21,27 @@ class MainPage(TemplateView):
         context.update({
             'title': 'Main Page',
         })
-        if self.request.user.is_authenticated:
-            context['name'] = 'Hello, ' + self.request.user.username
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited main page.')
+        return super().render_to_response(context, **response_kwargs)
 
 
 class SignUp(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        logging.info(f'User {self.object} signed up.')
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        logging.error(f'User {self.object} failed to sign up.')
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -37,9 +50,14 @@ class SignUp(CreateView):
         })
         return context
 
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited sign up page.')
+        return super().render_to_response(context, **response_kwargs)
+
 
 def logout_view(request):
     logout(request)
+    logging.info(f'User {request.user} logged out.')
     return redirect('index')
 
 
@@ -54,6 +72,10 @@ class ListVotingsPage(LoginRequiredMixin, ListView):
             'title': 'List Votings',
         })
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited list votings page.')
+        return super().render_to_response(context, **response_kwargs)
 
 
 class CreateVotingPage(LoginRequiredMixin, CreateView):
@@ -74,6 +96,16 @@ class CreateVotingPage(LoginRequiredMixin, CreateView):
             'title': 'Create Voting',
         })
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        logging.info(f'User {self.request.user} created voting {self.object}.')
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        logging.error(f'User {self.request.user} failed to create voting.')
+        return response
 
 
 class CreateQuestionPage(LoginRequiredMixin, CreateView):
@@ -101,8 +133,16 @@ class CreateQuestionPage(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         voting = form.instance.voting
         if len(voting.get_questions()) > 0:
+            logging.error(f'User {self.request.user} failed to create second question for voting {voting}.')
             raise PermissionDenied()
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        logging.info(f'User {self.request.user} created question {self.object}.')
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        logging.error(f'User {self.request.user} failed to create question.')
+        return response
 
 
 class CreateVariantsPage(LoginRequiredMixin, CreateView):
@@ -126,6 +166,16 @@ class CreateVariantsPage(LoginRequiredMixin, CreateView):
             'title': 'Create Variants',
         })
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        logging.info(f'User {self.request.user} created variant {self.object}.')
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        logging.error(f'User {self.request.user} failed to create variant.')
+        return response
 
 
 class VotingPage(LoginRequiredMixin, TemplateView):
@@ -152,13 +202,19 @@ class VotingPage(LoginRequiredMixin, TemplateView):
                 VoteFact.vote(request.user, variant)
         return redirect('voting', id=voting.id)
 
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited voting {context["voting"]}.')
+        return super().render_to_response(context, **response_kwargs)
+
 
 @login_required()
 def publish_voting(request, id: int):
     voting = get_object_or_404(Voting, id=id)
     if voting.author != request.user:
+        logging.error(f'User {request.user} failed to publish voting {voting}.')
         raise PermissionDenied()
     voting.publish()
+    logging.info(f'User {request.user} published voting {voting}.')
     return redirect('voting', id=voting.id)
 
 
