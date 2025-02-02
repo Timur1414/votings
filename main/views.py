@@ -233,6 +233,10 @@ class QuestionPage(LoginRequiredMixin, TemplateView):
         context['variants'] = question.get_variants()
         return context
 
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited question {context['question']}')
+        return super().render_to_response(context, **response_kwargs)
+
 
 class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'profile/profile.html'
@@ -254,6 +258,10 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         })
         return context
 
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited {context['user']}\'s profile.')
+        return super().render_to_response(context, **response_kwargs)
+
 
 class ListComplainsPage(UserPassesTestMixin, LoginRequiredMixin, ListView):
     template_name = 'complains/list.html'
@@ -269,6 +277,10 @@ class ListComplainsPage(UserPassesTestMixin, LoginRequiredMixin, ListView):
             'title': 'List Complains',
         })
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited complaints page.')
+        return super().render_to_response(context, **response_kwargs)
 
 
 class ComplaintPage(UserPassesTestMixin, LoginRequiredMixin, TemplateView):
@@ -295,6 +307,10 @@ class ComplaintPage(UserPassesTestMixin, LoginRequiredMixin, TemplateView):
             complain.block()
         return redirect('complains_list')
 
+    def render_to_response(self, context, **response_kwargs):
+        logging.info(f'User {self.request.user} visited complaint {context['complaint']}')
+        return super().render_to_response(context, **response_kwargs)
+
 
 class CreateComplaintPage(LoginRequiredMixin, CreateView):
     template_name = 'complains/create_complaint.html'
@@ -310,6 +326,16 @@ class CreateComplaintPage(LoginRequiredMixin, CreateView):
             'voting': voting
         }
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        logging.info(f'User {self.request.user} created complaint {self.object}.')
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        logging.error(f'User {self.request.user} failed to create complaint.')
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
@@ -321,9 +347,9 @@ class CreateComplaintPage(LoginRequiredMixin, CreateView):
 def like_voting(request, id: int):
     voting = None
     try:
-        print(id)
         voting = Voting.objects.get(id=id)
         voting.like(request.user)
+        logging.info(f'User {request.user} liked voting {voting}')
     except:
         return JsonResponse({'message': 'Invalid id'}, status=404)
     return JsonResponse({'count likes': voting.get_likes_count()}, status=200)
